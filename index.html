@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudharsan R | Editor • Coder • Freelancer</title>
+  <meta name="description" content="Portfolio of Sudharsan R - Editor, Coder, and Freelancer. Integrated M.Tech CSE student building high-impact digital experiences.">
+
+  <!-- Google Fonts: Bebas Neue, Outfit, Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Devicon CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & CUSTOM PROPERTIES
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #07090e;
+      --accent-blue: #3b82f6;
+      --accent-blue-rgb: 59, 130, 246;
+      --accent-cyan: #06b6d4;
+      --accent-cyan-rgb: 6, 182, 212;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --red-progress: #ef4444;
+      --red-progress-glow: rgba(239, 68, 68, 0.8);
+      
+      --glass-bg: rgba(13, 18, 30, 0.62);
+      --glass-bg-hover: rgba(18, 25, 42, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.09);
+      --glass-border-hover: rgba(59, 130, 246, 0.45);
+      --glass-blur: 16px;
+
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --font-display: 'Bebas Neue', cursive;
+      --font-body: 'Outfit', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+      line-height: 1.6;
+      position: relative;
+      background-color: var(--bg-dark);
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(7, 9, 14, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.35);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(59, 130, 246, 0.7);
+    }
+
+    /* ==========================================================================
+       TOP RED SCROLL PROGRESS BAR
+       ========================================================================== */
+    #scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3.5px;
+      width: 0%;
+      background: linear-gradient(90deg, #ef4444, #f43f5e, #fb7185);
+      box-shadow: 0 0 14px var(--red-progress-glow), 0 0 28px rgba(239, 68, 68, 0.4);
+      z-index: 9999;
+      transition: width 0.08s ease-out;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       SCROLL-DRIVEN BACKGROUND CANVAS
+       Fully visible without dark obscuring overlays to keep subject clear
+       ========================================================================== */
+    #canvas-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #bg-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Subtle edge vignette that keeps the center 100% crystal clear */
+    .canvas-ambient-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 45%, rgba(7, 9, 14, 0.35) 85%, rgba(7, 9, 14, 0.7) 100%);
+      pointer-events: none;
+    }
+
+    /* Canvas Frame Loading Indicator */
+    #canvas-loader {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(13, 18, 30, 0.85);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(12px);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--accent-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+    }
+    #canvas-loader.loaded {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    .spinner {
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(59, 130, 246, 0.2);
+      border-top-color: var(--accent-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       FLOATING PILL NAVBAR (Top-Center)
+       ========================================================================== */
+    .navbar-wrapper {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: auto;
+      max-width: 92vw;
+    }
+
+    .pill-navbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: rgba(13, 18, 30, 0.75);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 9999px;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(59, 130, 246, 0.15);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .pill-navbar:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 10px 35px -8px rgba(0, 0, 0, 0.7), 0 0 25px -4px rgba(59, 130, 246, 0.25);
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 7px 15px;
+      border-radius: 9999px;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-link i {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-link.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(37, 99, 235, 0.95));
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       FLOATING SOCIAL DOCK (Bottom-Right)
+       ========================================================================== */
+    .social-dock {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dock-btn {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(13, 18, 30, 0.75);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .dock-btn:hover {
+      color: #ffffff;
+      background: rgba(59, 130, 246, 0.25);
+      border-color: var(--accent-blue);
+      transform: translateY(-4px) scale(1.08);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Tooltip */
+    .dock-btn .tooltip {
+      position: absolute;
+      right: 56px;
+      top: 50%;
+      transform: translateY(-50%) translateX(6px);
+      background: rgba(13, 18, 30, 0.92);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--text-primary);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .dock-btn:hover .tooltip {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT WRAPPER & SECTIONS
+       Layout keeps the center open so the canvas subject is visible!
+       ========================================================================== */
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    section {
+      min-height: 100vh;
+      width: 100%;
+      padding: 100px 6vw 80px 6vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Glassmorphic Container Class */
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-panel:hover {
+      border-color: var(--glass-border-hover);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 25px -5px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Section Headings */
+    .section-tag {
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      margin-bottom: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-tag::before {
+      content: '//';
+      color: var(--accent-cyan);
+      opacity: 0.8;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      letter-spacing: 2px;
+      line-height: 1;
+      margin-bottom: 18px;
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .section-title span {
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 24px;
+      font-weight: 300;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 26px;
+      border-radius: 9999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      font-family: var(--font-body);
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59, 130, 246, 0.6);
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent-blue);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+    }
+
+    /* ==========================================================================
+       SECTION 1: HERO (Bottom-Left Aligned Name & Bottom-Right Badge)
+       ========================================================================== */
+    #hero {
+      min-height: 100vh;
+      padding-top: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end; /* Pushes hero content to the bottom */
+      padding-bottom: 80px;
+    }
+
+    .hero-content-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+      gap: 30px;
+    }
+
+    .hero-left-dock {
+      max-width: 600px;
+      padding: 30px 34px;
+      border-radius: 24px;
+    }
+
+    .hero-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .badge-pill {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #93c5fd;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-family: var(--font-code);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-pill.status {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #6ee7b7;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: clamp(3.4rem, 7.5vw, 6.5rem);
+      line-height: 0.92;
+      letter-spacing: 3px;
+      color: #ffffff;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-role {
+      font-family: var(--font-code);
+      font-size: 1.05rem;
+      color: var(--accent-cyan);
+      font-weight: 500;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .hero-tagline {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Hero Bottom-Right Info Dock */
+    .hero-right-dock {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 320px;
+      padding: 24px;
+      border-radius: 20px;
+      text-align: right;
+    }
+
+    .info-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-stat-label {
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .info-stat-value {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Scroll Prompt Indicator */
+    .scroll-down-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-family: var(--font-code);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.75;
+      animation: floatSlow 2.4s ease-in-out infinite;
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, 8px); }
+    }
+
+    /* ==========================================================================
+       SECTION 2: ABOUT (Left-Edge Weighted Card)
+       ========================================================================== */
+    #about {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .about-main-card {
+      padding: 40px;
+    }
+
+    .about-text {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .about-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .about-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .highlight-box {
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      transition: all 0.25s ease;
+    }
+    .highlight-box:hover {
+      background: rgba(59, 130, 246, 0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .highlight-box i {
+      color: var(--accent-blue);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .highlight-box h4 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .highlight-box p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .about-side-card {
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .quick-specs {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .quick-specs li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.9rem;
+    }
+
+    .quick-specs .spec-label {
+      color: var(--text-muted);
+      font-family: var(--font-code);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-specs .spec-val {
+      color: var(--text-primary);
+      font-weight: 500;
+      text-align: right;
+    }
+
+    /* ==========================================================================
+       SECTION 3: SERVICES / WHAT I DO (Interactive Cards)
+       ========================================================================== */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .service-card {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .service-card:hover::before {
+      opacity: 1;
+    }
+
+    .service-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-blue);
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .service-card:hover .service-icon-wrapper {
+      background: rgba(59, 130, 246, 0.25);
+      color: #ffffff;
+      transform: scale(1.08) rotate(4deg);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .service-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .service-desc {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .service-tag-item {
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--accent-cyan);
+    }
+
+    /* ==========================================================================
+       SECTION 4: PROJECTS (School Management System Feature)
+       ========================================================================== */
+    .projects-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .featured-project-card {
+      padding: 38px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 36px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .project-badge-highlight {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .project-name {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .project-details {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .project-feature-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .project-feature-list li {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .project-feature-list li i {
+      color: #10b981;
+      font-size: 0.8rem;
+    }
+
+    .project-tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tech-pill {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #bfdbfe;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .project-visual-preview {
+      background: rgba(7, 10, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .terminal-code {
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .code-comment { color: #64748b; }
+    .code-keyword { color: #f43f5e; }
+    .code-fn { color: #38bdf8; }
+    .code-str { color: #34d399; }
+
+    /* Secondary Projects Grid */
+    .secondary-projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .sub-project-card {
+      padding: 28px;
+    }
+
+    /* ==========================================================================
+       SECTION 5: SKILLS & TECH STACK (Devicon & FontAwesome)
+       ========================================================================== */
+    .skills-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .skill-category-card {
+      padding: 30px;
+    }
+
+    .skill-category-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .skill-category-header i {
+      color: var(--accent-blue);
+      font-size: 1.3rem;
+    }
+
+    .skill-category-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .skills-badge-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .skill-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .skill-badge:hover {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .skill-badge i {
+      font-size: 1.5rem;
+      color: var(--accent-cyan);
+    }
+
+    .skill-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .skill-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .skill-level {
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       SECTION 6: JOURNEY & EXPERIENCE (Vertical Timeline)
+       ========================================================================== */
+    .timeline-container {
+      position: relative;
+      max-width: 800px;
+      width: 100%;
+      margin-top: 20px;
+      padding-left: 30px;
+    }
+
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-blue), var(--accent-cyan), rgba(59, 130, 246, 0.1));
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 36px;
+    }
+
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-node {
+      position: absolute;
+      left: -30px;
+      top: 18px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--bg-dark);
+      border: 3px solid var(--accent-blue);
+      box-shadow: 0 0 12px var(--accent-blue);
+      transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover .timeline-node {
+      transform: scale(1.3);
+      border-color: #ffffff;
+      background: var(--accent-blue);
+    }
+
+    .timeline-card {
+      padding: 24px 28px;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .timeline-year {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .timeline-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .timeline-desc {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       SECTION 7: CONTACT (Bottom-Left Aligned - Never Centered)
+       ========================================================================== */
+    #contact {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end; /* Bottom-left alignment */
+      align-items: flex-start;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    .contact-wrapper {
+      max-width: 620px;
+      width: 100%;
+      padding: 40px;
+      border-radius: 24px;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .contact-info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 24px 0 28px 0;
+    }
+
+    .contact-item-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.25s ease;
+    }
+
+    .contact-item-row:hover {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+      transform: translateX(4px);
+    }
+
+    .contact-item-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-blue);
+      font-size: 1.1rem;
+    }
+
+    .contact-item-details {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .contact-item-label {
+      font-size: 0.72rem;
+      font-family: var(--font-code);
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .contact-item-value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .copy-btn:hover {
+      color: var(--accent-cyan);
+    }
+
+    .contact-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Toast Notification for Copy */
+    #copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(13, 18, 30, 0.95);
+      border: 1px solid var(--accent-blue);
+      backdrop-filter: blur(16px);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-family: var(--font-code);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.4);
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #copy-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer text */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      font-family: var(--font-code);
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(7, 9, 14, 0.85);
+      backdrop-filter: blur(10px);
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN / MEDIA QUERIES
+       ========================================================================== */
+    @media (max-width: 992px) {
+      .hero-content-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-right-dock {
+        text-align: left;
+        max-width: 100%;
+        width: 100%;
+      }
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+      .featured-project-card {
+        grid-template-columns: 1fr;
+      }
+      .skills-badge-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 5vw 60px 5vw;
+      }
+      .pill-navbar {
+        overflow-x: auto;
+        max-width: 95vw;
+        padding: 4px 6px;
+      }
+      .nav-link {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+      .nav-link i {
+        display: none;
+      }
+      .hero-name {
+        font-size: 3.2rem;
+      }
+      .social-dock {
+        bottom: 16px;
+        right: 16px;
+      }
+      .dock-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+      }
+      .contact-wrapper {
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. RED TOP SCROLL PROGRESS BAR -->
+  <div id="scroll-progress"></div>
+
+  <!-- 2. SCROLL-DRIVEN BACKGROUND CANVAS -->
+  <div id="canvas-container">
+    <canvas id="bg-canvas"></canvas>
+    <div class="canvas-ambient-vignette"></div>
+  </div>
+
+  <!-- Frame Loading Status -->
+  <div id="canvas-loader">
+    <div class="spinner"></div>
+    <span id="loader-text">Loading Visual Stream...</span>
+  </div>
+
+  <!-- 3. TOP-CENTER FLOATING PILL NAVBAR -->
+  <header class="navbar-wrapper">
+    <nav class="pill-navbar" id="pill-nav">
+      <a href="#hero" class="nav-link active" data-section="hero"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="#about" class="nav-link" data-section="about"><i class="fa-solid fa-user"></i> About</a>
+      <a href="#services" class="nav-link" data-section="services"><i class="fa-solid fa-layer-group"></i> Services</a>
+      <a href="#projects" class="nav-link" data-section="projects"><i class="fa-solid fa-code"></i> Projects</a>
+      <a href="#skills" class="nav-link" data-section="skills"><i class="fa-solid fa-microchip"></i> Skills</a>
+      <a href="#journey" class="nav-link" data-section="journey"><i class="fa-solid fa-timeline"></i> Journey</a>
+      <a href="#contact" class="nav-link" data-section="contact"><i class="fa-solid fa-paper-plane"></i> Contact</a>
+    </nav>
+  </header>
+
+  <!-- 4. BOTTOM-RIGHT FLOATING SOCIAL DOCK -->
+  <aside class="social-dock">
+    <a href="https://github.com/sudharsankrs" target="_blank" rel="noopener noreferrer" class="dock-btn" aria-label="GitHub Profile">
+      <i class="fa-brands fa-github"></i>
+      <span class="tooltip">GitHub @sudharsankrs</span>
+    </a>
+    <a href="https://www.instagram.com/itz_sudharsxn?igsi=a2d3ejQ4YXJxbjZr&utm_source=qr" target="_blank" rel="noopener noreferrer" class="dock-btn" aria-label="Instagram Profile">
+      <i class="fa-brands fa-instagram"></i>
+      <span class="tooltip">Instagram @itz_sudharsxn</span>
+    </a>
+    <a href="mailto:sudharsanvitap@gmail.com" class="dock-btn" aria-label="Send Email">
+      <i class="fa-solid fa-envelope"></i>
+      <span class="tooltip">sudharsanvitap@gmail.com</span>
+    </a>
+    <a href="#contact" class="dock-btn" aria-label="Quick Connect">
+      <i class="fa-solid fa-bolt"></i>
+      <span class="tooltip">Hire Me</span>
+    </a>
+  </aside>
+
+  <!-- Copy Notification Toast -->
+  <div id="copy-toast">
+    <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+    <span>Email copied to clipboard!</span>
+  </div>
+
+  <!-- ==========================================================================
+       MAIN CONTENT SECTIONS (7 Ordered Sections)
+       ========================================================================== -->
+  <main>
+
+    <!-- SECTION 1: HERO (Bottom-Left Name & Bottom-Right Badges) -->
+    <section id="hero">
+      <div class="hero-content-wrapper">
+        <!-- Bottom-Left Aligned Hero Dock -->
+        <div class="hero-left-dock glass-panel">
+          <div class="hero-badge-row">
+            <span class="badge-pill status"><span class="status-dot"></span> Available for Freelance</span>
+            <span class="badge-pill"><i class="fa-solid fa-location-dot"></i> Vijayawada, India</span>
+          </div>
+
+          <h1 class="hero-name">SUDHARSAN R</h1>
+          <div class="hero-role">&lt;Editor / Coder / Freelancer&gt;</div>
+          <p class="hero-tagline">Building digital experiences that matter.</p>
+
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">
+              <i class="fa-solid fa-briefcase"></i> Explore Works
+            </a>
+            <a href="#contact" class="btn btn-glass">
+              <i class="fa-solid fa-message"></i> Get in Touch
+            </a>
+          </div>
+        </div>
+
+        <!-- Bottom-Right Hero Info Dock -->
+        <div class="hero-right-dock glass-panel">
+          <div class="info-stat-item">
+            <span class="info-stat-label">Current Pursuit</span>
+            <span class="info-stat-value">Integrated M.Tech CSE</span>
+            <span class="spec-val" style="font-size: 0.8rem; color: var(--accent-cyan); font-family: var(--font-code);">Second Year</span>
+          </div>
+          <div class="info-stat-item" style="margin-top: 8px;">
+            <span class="info-stat-label">Core Philosophy</span>
+            <span class="info-stat-value">Code + Visual Storytelling</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll prompt -->
+      <div class="scroll-down-hint">
+        <span>Scroll to animate</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+    </section>
+
+    <!-- SECTION 2: ABOUT -->
+    <section id="about">
+      <div class="about-grid">
+        <!-- Left Main Card -->
+        <div class="about-main-card glass-panel">
+          <div class="section-tag">Overview</div>
+          <h2 class="section-title">ENGINEERING <span>&amp; VISUALS</span></h2>
+          
+          <p class="about-text">
+            Hi, I'm <strong>Sudharsan R</strong>—an Integrated M.Tech Computer Science student in my 2nd year based in Vijayawada, India. I operate at the intersection of robust code, interactive web design, and cinematic video editing.
+          </p>
+          <p class="about-text">
+            Whether architecting efficient backend logic in <strong>Python</strong>, building modular systems in <strong>Java &amp; C++</strong>, or cutting high-retention video stories, I believe in crafting digital products with technical precision and compelling aesthetic depth.
+          </p>
+
+          <div class="about-highlights">
+            <div class="highlight-box">
+              <i class="fa-solid fa-code"></i>
+              <h4>Clean Architecture</h4>
+              <p>Modular, maintainable codebases built for real-world reliability.</p>
+            </div>
+            <div class="highlight-box">
+              <i class="fa-solid fa-film"></i>
+              <h4>Cinematic Edge</h4>
+              <p>Pacing, color dynamics, and narrative rhythm that captivate audiences.</p>
+            </div>
+            <div class="highlight-box">
+              <i class="fa-solid fa-cubes"></i>
+              <h4>Full Lifecycle</h4>
+              <p>From concept wireframe to deployment and visual marketing.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side Card -->
+        <div class="about-side-card glass-panel">
+          <div>
+            <div class="section-tag">At a Glance</div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 20px;">Profile Snapshot</h3>
+            
+            <ul class="quick-specs">
+              <li>
+                <span class="spec-label"><i class="fa-solid fa-graduation-cap"></i> Degree</span>
+                <span class="spec-val">Int. M.Tech CSE (Year 2)</span>
+              </li>
+              <li>
+                <span class="spec-label"><i class="fa-solid fa-map-pin"></i> Location</span>
+                <span class="spec-val">Vijayawada, India</span>
+              </li>
+              <li>
+                <span class="spec-label"><i class="fa-solid fa-terminal"></i> Primary Focus</span>
+                <span class="spec-val">Software &amp; Video Media</span>
+              </li>
+              <li>
+                <span class="spec-label"><i class="fa-solid fa-handshake"></i> Availability</span>
+                <span class="spec-val" style="color: #34d399;">Freelance &amp; Collabs</span>
+              </li>
+            </ul>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <a href="mailto:sudharsanvitap@gmail.com" class="btn btn-primary" style="width: 100%; justify-content: center;">
+              <i class="fa-solid fa-envelope"></i> Let's Collaborate
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SERVICES / WHAT I DO (4-6 services) -->
+    <section id="services">
+      <div class="section-tag">Capabilities</div>
+      <h2 class="section-title">WHAT I <span>DELIVER</span></h2>
+      <p class="section-desc">Versatile engineering and creative services tailored for startups, brands, and demanding digital projects.</p>
+
+      <div class="services-grid">
+        <!-- Service 1: UI/UX Design -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <h3 class="service-title">UI/UX Design</h3>
+            <p class="service-desc">
+              Transforming complex workflows into intuitive, clean interfaces. Comprehensive Figma-to-code design systems, user research, wireframes, and interactive clickable prototypes.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">Figma</span>
+            <span class="service-tag-item">Wireframing</span>
+            <span class="service-tag-item">Figma-to-Code</span>
+            <span class="service-tag-item">Design Systems</span>
+          </div>
+        </div>
+
+        <!-- Service 2: Frontend Development -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-brands fa-react"></i>
+            </div>
+            <h3 class="service-title">Frontend Engineering</h3>
+            <p class="service-desc">
+              Building dynamic, highly responsive web interfaces with React, Next.js, and high-performance modern CSS. Focused on fluid animations, micro-interactions, and accessibility.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">React</span>
+            <span class="service-tag-item">Next.js</span>
+            <span class="service-tag-item">Canvas / WebGL</span>
+            <span class="service-tag-item">Responsive UI</span>
+          </div>
+        </div>
+
+        <!-- Service 3: Cinematic Video Editing -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-solid fa-video"></i>
+            </div>
+            <h3 class="service-title">Cinematic Video Editing</h3>
+            <p class="service-desc">
+              High-retention video production and post-production. Precision pacing, custom sound design, color grading, motion graphics, and narrative editing for digital campaigns and reels.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">Color Grading</span>
+            <span class="service-tag-item">Sound Design</span>
+            <span class="service-tag-item">Motion Graphics</span>
+            <span class="service-tag-item">Storytelling</span>
+          </div>
+        </div>
+
+        <!-- Service 4: Python & Software Development -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-brands fa-python"></i>
+            </div>
+            <h3 class="service-title">Python &amp; Core Systems</h3>
+            <p class="service-desc">
+              Custom software solutions, automation scripts, desktop applications, and algorithms crafted in Python, Java, and C++ with clean object-oriented architecture.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">Python</span>
+            <span class="service-tag-item">Java</span>
+            <span class="service-tag-item">C++</span>
+            <span class="service-tag-item">Automation</span>
+          </div>
+        </div>
+
+        <!-- Service 5: Database Architecture -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-solid fa-database"></i>
+            </div>
+            <h3 class="service-title">Database &amp; Data Models</h3>
+            <p class="service-desc">
+              Relational schema design, MySQL queries, transaction integrity, indexing, and seamless database integration with frontend and backend layers.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">MySQL</span>
+            <span class="service-tag-item">Schema Design</span>
+            <span class="service-tag-item">CRUD Operations</span>
+            <span class="service-tag-item">Data Security</span>
+          </div>
+        </div>
+
+        <!-- Service 6: Freelance Project Delivery -->
+        <div class="service-card glass-panel">
+          <div>
+            <div class="service-icon-wrapper">
+              <i class="fa-solid fa-rocket"></i>
+            </div>
+            <h3 class="service-title">Freelance Digital Solutions</h3>
+            <p class="service-desc">
+              End-to-end execution for independent clients. Fast turnaround, transparent communication, custom feature implementations, and high-impact digital outcomes.
+            </p>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag-item">Rapid Prototyping</span>
+            <span class="service-tag-item">Client Support</span>
+            <span class="service-tag-item">Git Workflow</span>
+            <span class="service-tag-item">Antigravity AI</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: PROJECTS -->
+    <section id="projects">
+      <div class="section-tag">Portfolio Showcase</div>
+      <h2 class="section-title">FEATURED <span>WORKS</span></h2>
+      <p class="section-desc">Selected software engineering projects, desktop applications, and digital creations.</p>
+
+      <div class="projects-container">
+        <!-- Featured Project 1: School Management System -->
+        <div class="featured-project-card glass-panel">
+          <div>
+            <div class="project-badge-highlight">
+              <i class="fa-solid fa-star"></i> Featured Flagship Project
+            </div>
+            <h3 class="project-name">School Management System</h3>
+            <p class="project-details">
+              A comprehensive educational management application engineered in Python. Designed to streamline academic administration, automate record-keeping, and handle student lifecycle data with precision.
+            </p>
+
+            <ul class="project-feature-list">
+              <li><i class="fa-solid fa-check"></i> Student Enrollment &amp; Records</li>
+              <li><i class="fa-solid fa-check"></i> Fee Tracking &amp; Invoicing</li>
+              <li><i class="fa-solid fa-check"></i> Attendance Monitoring</li>
+              <li><i class="fa-solid fa-check"></i> Automated Report Generation</li>
+            </ul>
+
+            <div class="project-tech-stack">
+              <span class="tech-pill"><i class="devicon-python-plain"></i> Python</span>
+              <span class="tech-pill"><i class="devicon-mysql-plain"></i> MySQL</span>
+              <span class="tech-pill"><i class="fa-solid fa-file-invoice"></i> File I/O &amp; Reports</span>
+              <span class="tech-pill"><i class="fa-solid fa-cubes"></i> Modular Architecture</span>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <a href="https://github.com/sudharsankrs" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                <i class="fa-brands fa-github"></i> View Repository
+              </a>
+              <a href="#contact" class="btn btn-glass">
+                <i class="fa-solid fa-circle-info"></i> Project Inquiries
+              </a>
+            </div>
+          </div>
+
+          <!-- Code / Terminal Visual Preview -->
+          <div class="project-visual-preview">
+            <div class="terminal-header">
+              <span class="terminal-dot dot-red"></span>
+              <span class="terminal-dot dot-yellow"></span>
+              <span class="terminal-dot dot-green"></span>
+              <span style="color: #64748b; font-size: 0.75rem; margin-left: 8px;">school_management.py</span>
+            </div>
+            <div class="terminal-code">
+              <span class="code-comment"># School Management System Core Engine</span><br>
+              <span class="code-keyword">import</span> mysql.connector<br>
+              <span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass<br><br>
+              <span class="code-keyword">class</span> <span class="code-fn">SchoolDatabase</span>:<br>
+              &nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-fn">generate_report</span>(self, student_id):<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;records = self.fetch(student_id)<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> <span class="code-str">f"Status: OK | GPA: {records.gpa}"</span><br><br>
+              <span class="code-comment">&gt; System initialized successfully.</span><br>
+              <span class="code-comment">&gt; 100% Student records synced.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary Project Cards -->
+        <div class="secondary-projects-grid">
+          <!-- Card 2: Cinematic Video Editing Reel -->
+          <div class="sub-project-card glass-panel">
+            <div class="service-icon-wrapper" style="color: #f43f5e; background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.3);">
+              <i class="fa-solid fa-clapperboard"></i>
+            </div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Cinematic Video Productions</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+              Dynamic video editing showcase spanning commercial promos, creative reels, color science manipulation, and audio-reactive pacing.
+            </p>
+            <div class="project-tech-stack" style="margin-bottom: 16px;">
+              <span class="tech-pill">Premiere Pro</span>
+              <span class="tech-pill">After Effects</span>
+              <span class="tech-pill">Color Grading</span>
+            </div>
+            <a href="https://www.instagram.com/itz_sudharsxn?igsi=a2d3ejQ4YXJxbjZr&utm_source=qr" target="_blank" rel="noopener noreferrer" class="btn btn-glass" style="font-size: 0.85rem; padding: 8px 16px;">
+              <i class="fa-brands fa-instagram"></i> Watch on Instagram
+            </a>
+          </div>
+
+          <!-- Card 3: Interactive Web & UI Prototypes -->
+          <div class="sub-project-card glass-panel">
+            <div class="service-icon-wrapper" style="color: var(--accent-cyan); background: rgba(6, 182, 212, 0.12); border-color: rgba(6, 182, 212, 0.3);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Interactive Digital Experiences</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px;">
+              Experimental web interfaces integrating smooth scroll sequences, glassmorphic UI elements, and reactive state management.
+            </p>
+            <div class="project-tech-stack" style="margin-bottom: 16px;">
+              <span class="tech-pill">HTML5 Canvas</span>
+              <span class="tech-pill">JavaScript ES6</span>
+              <span class="tech-pill">Glassmorphism</span>
+            </div>
+            <a href="https://github.com/sudharsankrs" target="_blank" rel="noopener noreferrer" class="btn btn-glass" style="font-size: 0.85rem; padding: 8px 16px;">
+              <i class="fa-brands fa-github"></i> Explore Code
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: SKILLS & TECH STACK -->
+    <section id="skills">
+      <div class="section-tag">Proficiencies</div>
+      <h2 class="section-title">TECHNICAL <span>STACK</span></h2>
+      <p class="section-desc">Languages, database technologies, and professional toolsets I utilize to build modern software and media.</p>
+
+      <div class="skills-wrapper">
+        <!-- Category 1: Programming Languages -->
+        <div class="skill-category-card glass-panel">
+          <div class="skill-category-header">
+            <i class="fa-solid fa-code"></i>
+            <h3 class="skill-category-title">Languages</h3>
+          </div>
+          <div class="skills-badge-grid">
+            <div class="skill-badge">
+              <i class="devicon-python-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">Python</span>
+                <span class="skill-level">Core Expertise</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-java-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">Java</span>
+                <span class="skill-level">OOP &amp; Data Structures</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-cplusplus-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">C++</span>
+                <span class="skill-level">Systems &amp; Logic</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-javascript-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">JavaScript</span>
+                <span class="skill-level">ES6+ &amp; DOM Canvas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 2: Databases & Tools -->
+        <div class="skill-category-card glass-panel">
+          <div class="skill-category-header">
+            <i class="fa-solid fa-server"></i>
+            <h3 class="skill-category-title">Databases &amp; Workflow</h3>
+          </div>
+          <div class="skills-badge-grid">
+            <div class="skill-badge">
+              <i class="devicon-mysql-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">MySQL</span>
+                <span class="skill-level">Relational DB</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-git-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">Git</span>
+                <span class="skill-level">Version Control</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-github-original"></i>
+              <div class="skill-info">
+                <span class="skill-name">GitHub</span>
+                <span class="skill-level">Collaboration</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="fa-solid fa-atom" style="color: #60a5fa;"></i>
+              <div class="skill-info">
+                <span class="skill-name">Antigravity</span>
+                <span class="skill-level">AI Agent Tools</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 3: Creative & Design Tools -->
+        <div class="skill-category-card glass-panel">
+          <div class="skill-category-header">
+            <i class="fa-solid fa-palette"></i>
+            <h3 class="skill-category-title">Creative &amp; Design</h3>
+          </div>
+          <div class="skills-badge-grid">
+            <div class="skill-badge">
+              <i class="devicon-figma-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">Figma</span>
+                <span class="skill-level">UI/UX Wireframing</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="fa-solid fa-video" style="color: #f43f5e;"></i>
+              <div class="skill-info">
+                <span class="skill-name">Video Editing</span>
+                <span class="skill-level">Pacing &amp; Narrative</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="fa-solid fa-sliders" style="color: #38bdf8;"></i>
+              <div class="skill-info">
+                <span class="skill-name">Color Grading</span>
+                <span class="skill-level">Cinematic Look</span>
+              </div>
+            </div>
+            <div class="skill-badge">
+              <i class="devicon-html5-plain colored"></i>
+              <div class="skill-info">
+                <span class="skill-name">HTML5 / CSS3</span>
+                <span class="skill-level">Glassmorphism</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: JOURNEY & EXPERIENCE -->
+    <section id="journey">
+      <div class="section-tag">Timeline</div>
+      <h2 class="section-title">MY <span>JOURNEY</span></h2>
+      <p class="section-desc">Key milestones shaping my evolution as an engineer, creator, and freelancer.</p>
+
+      <div class="timeline-container">
+        <!-- Milestone 1: 2023 -->
+        <div class="timeline-item">
+          <div class="timeline-node"></div>
+          <div class="timeline-card glass-panel">
+            <div class="timeline-header">
+              <span class="timeline-year">2023</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-code);">The Spark</span>
+            </div>
+            <h3 class="timeline-title">First Python Project &amp; Foundational Code</h3>
+            <p class="timeline-desc">
+              Built my very first complete Python application during school days—the School Management System. Gained hands-on mastery over logic structuring, data handling, and algorithmic thinking.
+            </p>
+          </div>
+        </div>
+
+        <!-- Milestone 2: 2025 -->
+        <div class="timeline-item">
+          <div class="timeline-node"></div>
+          <div class="timeline-card glass-panel">
+            <div class="timeline-header">
+              <span class="timeline-year">2025</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-code);">Deep Mastery</span>
+            </div>
+            <h3 class="timeline-title">Mastered Python &amp; CS Fundamentals</h3>
+            <p class="timeline-desc">
+              Advanced into Integrated M.Tech CSE studies. Deepened expertise in object-oriented programming, MySQL relational schemas, and multi-language development with Java and C++.
+            </p>
+          </div>
+        </div>
+
+        <!-- Milestone 3: 2026 -->
+        <div class="timeline-item">
+          <div class="timeline-node"></div>
+          <div class="timeline-card glass-panel">
+            <div class="timeline-header">
+              <span class="timeline-year">2026</span>
+              <span style="font-size: 0.8rem; color: #34d399; font-family: var(--font-code);">Current Focus</span>
+            </div>
+            <h3 class="timeline-title">Cinematic Video Editing &amp; Freelance Scaling</h3>
+            <p class="timeline-desc">
+              Expanded into professional cinematic video editing and independent freelance consulting. Combining coding capabilities with creative media production to build impactful digital experiences.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: CONTACT (Bottom-Left Aligned - Never Centered) -->
+    <section id="contact">
+      <div class="contact-wrapper glass-panel">
+        <div class="section-tag">Get in Touch</div>
+        <h2 class="section-title" style="font-size: clamp(2rem, 4vw, 3.2rem);">LET'S BUILD <span>SOMETHING</span></h2>
+        
+        <p class="section-desc" style="margin-bottom: 20px;">
+          Have an exciting project, freelance opportunity, or video collaboration? Reach out directly.
+        </p>
+
+        <div class="contact-info-grid">
+          <!-- Email Row with Copy Button -->
+          <div class="contact-item-row">
+            <div class="contact-item-icon">
+              <i class="fa-solid fa-envelope"></i>
+            </div>
+            <div class="contact-item-details">
+              <span class="contact-item-label">Direct Email</span>
+              <a href="mailto:sudharsanvitap@gmail.com" class="contact-item-value" style="color: #ffffff; text-decoration: none;">sudharsanvitap@gmail.com</a>
+            </div>
+            <button class="copy-btn" id="copy-email-btn" title="Copy Email to Clipboard" aria-label="Copy email">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+
+          <!-- Location Row -->
+          <div class="contact-item-row">
+            <div class="contact-item-icon" style="color: var(--accent-cyan); background: rgba(6, 182, 212, 0.15);">
+              <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="contact-item-details">
+              <span class="contact-item-label">Location</span>
+              <span class="contact-item-value">Vijayawada, Andhra Pradesh, India</span>
+            </div>
+          </div>
+
+          <!-- Socials Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <a href="https://github.com/sudharsankrs" target="_blank" rel="noopener noreferrer" class="contact-item-row" style="margin: 0;">
+              <div class="contact-item-icon">
+                <i class="fa-brands fa-github"></i>
+              </div>
+              <div class="contact-item-details">
+                <span class="contact-item-label">GitHub</span>
+                <span class="contact-item-value">@sudharsankrs</span>
+              </div>
+            </a>
+
+            <a href="https://www.instagram.com/itz_sudharsxn?igsi=a2d3ejQ4YXJxbjZr&utm_source=qr" target="_blank" rel="noopener noreferrer" class="contact-item-row" style="margin: 0;">
+              <div class="contact-item-icon" style="color: #f43f5e; background: rgba(244, 63, 94, 0.15);">
+                <i class="fa-brands fa-instagram"></i>
+              </div>
+              <div class="contact-item-details">
+                <span class="contact-item-label">Instagram</span>
+                <span class="contact-item-value">@itz_sudharsxn</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="contact-action-row">
+          <a href="mailto:sudharsanvitap@gmail.com?subject=Project%20Inquiry%20-%20Sudharsan%20R" class="btn btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Send Message
+          </a>
+          <button class="btn btn-glass" id="trigger-copy-btn">
+            <i class="fa-regular fa-clone"></i> Copy Email
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Sudharsan R. Crafted with precision &bull; Editor &bull; Coder &bull; Freelancer</p>
+  </footer>
+
+  <!-- ==========================================================================
+       SCROLL ANIMATION & INTERACTION SCRIPT
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* --- CONFIGURATION --- */
+      const TOTAL_FRAMES = 186;
+      const FRAME_PREFIX = 'frames/img_';
+      const FRAME_PAD_LENGTH = 5;
+      const FRAME_EXT = '.jpg';
+
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      const progressBar = document.getElementById('scroll-progress');
+      const loaderEl = document.getElementById('canvas-loader');
+      const loaderText = document.getElementById('loader-text');
+      const copyEmailBtn = document.getElementById('copy-email-btn');
+      const triggerCopyBtn = document.getElementById('trigger-copy-btn');
+      const toast = document.getElementById('copy-toast');
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('main > section');
+
+      // Helper to generate filename: frames/img_00001.jpg -> frames/img_00186.jpg
+      function getFrameUrl(index) {
+        const paddedNum = String(index).padStart(FRAME_PAD_LENGTH, '0');
+        return `${FRAME_PREFIX}${paddedNum}${FRAME_EXT}`;
+      }
+
+      /* --- HIGH RESOLUTION CANVAS RESIZING --- */
+      let dpr = window.devicePixelRatio || 1;
+      function resizeCanvas() {
+        dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        renderCurrentFrame();
+      }
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+
+      /* --- IMAGE PRELOADER & CACHING --- */
+      const images = new Array(TOTAL_FRAMES + 1);
+      let loadedCount = 0;
+      let hasFramesLoaded = false;
+
+      // Draw active frame or graceful fallback
+      function drawImageProp(img) {
+        if (!img || !img.complete || img.naturalWidth === 0) {
+          drawDynamicFallback();
+          return;
+        }
+
+        const imgWidth = img.naturalWidth;
+        const imgHeight = img.naturalHeight;
+        const cWidth = canvas.width;
+        const cHeight = canvas.height;
+
+        const imgRatio = imgWidth / imgHeight;
+        const canvasRatio = cWidth / cHeight;
+
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (canvasRatio > imgRatio) {
+          drawWidth = cWidth;
+          drawHeight = cWidth / imgRatio;
+          offsetX = 0;
+          offsetY = (cHeight - drawHeight) / 2;
+        } else {
+          drawWidth = cHeight * imgRatio;
+          drawHeight = cHeight;
+          offsetX = (cWidth - drawWidth) / 2;
+          offsetY = 0;
+        }
+
+        ctx.clearRect(0, 0, cWidth, cHeight);
+        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      }
+
+      // Elegant ambient visual fallback if frame files are pending local copy
+      function drawDynamicFallback() {
+        const cWidth = canvas.width;
+        const cHeight = canvas.height;
+        ctx.clearRect(0, 0, cWidth, cHeight);
+
+        // Dark gradient background
+        const grad = ctx.createRadialGradient(cWidth / 2, cHeight / 2, 50, cWidth / 2, cHeight / 2, Math.max(cWidth, cHeight) / 1.1);
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(0.5, '#070a13');
+        grad.addColorStop(1, '#030508');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, cWidth, cHeight);
+
+        // Subtle electric grid lines
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.04)';
+        ctx.lineWidth = 1;
+        const gridSize = 60 * dpr;
+        for (let x = 0; x < cWidth; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, cHeight);
+          ctx.stroke();
+        }
+        for (let y = 0; y < cHeight; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(cWidth, y);
+          ctx.stroke();
+        }
+      }
+
+      let currentFrameIndex = 1;
+
+      function renderCurrentFrame() {
+        const img = images[currentFrameIndex];
+        drawImageProp(img);
+      }
+
+      // Preload Frame 1 immediately for instant render
+      function initPreload() {
+        resizeCanvas();
+
+        const firstImg = new Image();
+        firstImg.src = getFrameUrl(1);
+        firstImg.onload = () => {
+          images[1] = firstImg;
+          hasFramesLoaded = true;
+          renderCurrentFrame();
+        };
+        firstImg.onerror = () => {
+          // Fallback gracefully if frames are not placed yet
+          drawDynamicFallback();
+        };
+
+        // Preload the rest asynchronously
+        for (let i = 1; i <= TOTAL_FRAMES; i++) {
+          const img = new Image();
+          img.src = getFrameUrl(i);
+          img.onload = () => {
+            images[i] = img;
+            loadedCount++;
+            hasFramesLoaded = true;
+
+            if (loaderText) {
+              const pct = Math.floor((loadedCount / TOTAL_FRAMES) * 100);
+              loaderText.textContent = `Streaming Frames: ${pct}%`;
+            }
+
+            if (loadedCount >= TOTAL_FRAMES) {
+              if (loaderEl) loaderEl.classList.add('loaded');
+            }
+          };
+          img.onerror = () => {
+            // Count failed silently and dismiss loader
+            loadedCount++;
+            if (loadedCount >= TOTAL_FRAMES && loaderEl) {
+              loaderEl.classList.add('loaded');
+            }
+          };
+        }
+      }
+
+      /* --- SCROLL-DRIVEN ANIMATION LOOP --- */
+      let latestScrollY = 0;
+      let isTicking = false;
+
+      function onScroll() {
+        latestScrollY = window.scrollY;
+        if (!isTicking) {
+          requestAnimationFrame(updateScrollState);
+          isTicking = true;
+        }
+      }
+
+      function updateScrollState() {
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollFraction = maxScroll > 0 ? Math.max(0, Math.min(1, latestScrollY / maxScroll)) : 0;
+
+        // 1. Update Red Progress Bar
+        if (progressBar) {
+          progressBar.style.width = (scrollFraction * 100) + '%';
+        }
+
+        // 2. Map scroll fraction to frame index (1 to TOTAL_FRAMES)
+        const frameIndex = Math.min(
+          TOTAL_FRAMES,
+          Math.max(1, Math.floor(scrollFraction * (TOTAL_FRAMES - 1)) + 1)
+        );
+
+        if (frameIndex !== currentFrameIndex) {
+          currentFrameIndex = frameIndex;
+          renderCurrentFrame();
+        }
+
+        // 3. Highlight Active Section in Floating Pill Navbar
+        updateActiveNav();
+
+        isTicking = false;
+      }
+
+      function updateActiveNav() {
+        const scrollMiddle = window.scrollY + (window.innerHeight * 0.35);
+        let activeId = 'hero';
+
+        sections.forEach(sec => {
+          const top = sec.offsetTop;
+          const height = sec.offsetHeight;
+          if (scrollMiddle >= top && scrollMiddle < top + height) {
+            activeId = sec.getAttribute('id');
+          }
+        });
+
+        navLinks.forEach(link => {
+          if (link.getAttribute('data-section') === activeId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+
+      /* --- COPY EMAIL TO CLIPBOARD --- */
+      function copyEmail() {
+        const email = 'sudharsanvitap@gmail.com';
+        navigator.clipboard.writeText(email).then(() => {
+          showToast();
+        }).catch(() => {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = email;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast();
+        });
+      }
+
+      function showToast() {
+        if (!toast) return;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+
+      if (copyEmailBtn) copyEmailBtn.addEventListener('click', copyEmail);
+      if (triggerCopyBtn) triggerCopyBtn.addEventListener('click', copyEmail);
+
+      // Start preloader on DOM ready
+      document.addEventListener('DOMContentLoaded', () => {
+        initPreload();
+        updateScrollState();
+      });
+
+      // Quick timeout fallback to hide loader if user opens offline
+      setTimeout(() => {
+        if (loaderEl) loaderEl.classList.add('loaded');
+      }, 4000);
+
+    })();
+  </script>
+</body>
+</html>
